@@ -551,13 +551,20 @@ public class MainActivity extends Activity {
             contentBuffer.setLength(0);
             matchingTagBuffer.setLength(0);
         }
+        
         if (globalCurrentStream != null) {
-            try {
-                globalCurrentStream.close();
-            } catch (IOException ignored) {}
+            final okhttp3.Response streamToClose = globalCurrentStream;
             globalCurrentStream = null;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        streamToClose.close();
+                    } catch (IOException ignored) {}
+                }
+            }).start();
         }
-
+        
         Chat currentChat = ChatManager.getInstance().getCurrentChat();
         if (currentChat != null) {
             List<Message> msgs = currentChat.getMessages();
